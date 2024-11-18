@@ -25,11 +25,13 @@ type Profile struct {
 var profiles = []Profile{
 	//{id: 87, nickname: "Check", hashPassword: "dsawqcxs", status: true, accessLevel: 23, firstname: "Tom", lastname: "qwerty", t: time.Now()},
 }
-var countidProfiles int = 2
 
 func GetProfiles(c *gin.Context) {
-
-	rows, err := Db.Query("select * from profiles")
+	//Db := *DbGlobal
+	//fmt.Println(Db)
+	fmt.Println("===inFunc====DbGlobal :\n", DbGlobal, "\n\n\n\n")
+	fmt.Println("===inFunc====*DbGlobal :\n", *DbGlobal, "\n\n\n\n")
+	rows, err := (*DbGlobal).Query("select * from profiles")
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +54,7 @@ func GetProfiles(c *gin.Context) {
 }
 
 func GetProfileById(c *gin.Context) {
+	var Db = *DbGlobal
 	id := c.Param("id")
 
 	row := Db.QueryRow("select * from profiles WHERE id = $1;", id)
@@ -60,12 +63,14 @@ func GetProfileById(c *gin.Context) {
 	err := row.Scan(&p.Id, &p.Nickname, &p.HashPassword, &p.Status, &p.AccessLevel, &p.Firstname, &p.Lastname, &p.CreatedAt)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "profile not found"})
-		panic(err)
+		return
+		//panic(err)
 	}
 	c.JSON(http.StatusOK, p)
 }
 
 func CreateProfile(c *gin.Context) {
+	var Db = *DbGlobal
 	p := Profile{}
 
 	if err := c.BindJSON(&p); err != nil {

@@ -2,10 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"gin-notes-api/database"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -13,34 +11,20 @@ import (
 
 var connStr string
 
-var Db *sql.DB
+var DbGlobal **sql.DB
 
 func main() {
-
-	// Чтение файла
-	data, err := ioutil.ReadFile("database/config_db.json")
-	if err != nil {
-		log.Fatalf("Не удалось прочитать файл: %v", err)
-	}
-	connStr = "sda"
-
-	// Парсинг JSON
-	if err := json.Unmarshal(data, &config); err != nil {
-		log.Fatalf("Ошибка парсинга JSON: %v", err)
-	}
-
-	// Формирование строки подключения
-	connStr := fmt.Sprintf(
-		"user=%s password=%s dbname=%s sslmode=%s host=%s port=%s",
-		config.user, config.password, config.dbname, config.sslmode, config.host, config.port,
-	)
-	var dbTemp, errDb = sql.Open("postgres", connStr)
+	connStr := database.StringConnectToBase("database/config_db.json")
+	var db, errDb = sql.Open("postgres", connStr)
 	if errDb != nil {
-		panic(err)
+		panic(errDb)
 	}
+	defer db.Close()
+	DbGlobal = &db
+	fmt.Println("=======db :\n", db)
+	fmt.Println("=======DbGlobal :\n", DbGlobal, "\n\n\n\n")
+	fmt.Println("=======*DbGlobal :\n", *DbGlobal, "\n\n\n\n")
 	fmt.Println("Data base is working!")
-	defer dbTemp.Close()
-	Db = dbTemp
 	// db, err := sql.Open("postgres", connStr)
 	// if err != nil {
 	// 	panic(err)
@@ -89,8 +73,14 @@ func main() {
 	// Получение всех профилей
 	router.GET("/profiles", GetProfiles)
 
-	// Получение поста по ID
+	// Получение профиля по ID
 	router.GET("/profiles/:id", GetProfileById)
+
+	// Создание профиля
+	router.POST("/profiles", CreateProfile)
+
+	// Обновление существующего профиля
+	router.PUT("/profiles/:id", UpdateProfile)
 
 	router.Run(":8080")
 }

@@ -3,28 +3,35 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 )
 
-type Config struct {
-	user     string `json:"user"`
-	password string `json:"password"`
-	dbname   string `json:"dbname"`
-	sslmode  string `json:"sslmode"`
-	host     string `json:"host"`
-	port     string `json:"port"`
-}
-
-func LoadConfig(filePath string) (Config, error) {
-	file, err := os.Open(filePath)
+func StringConnectToBase(filePath string) string {
+	// Открытие и чтение файла
+	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return _, fmt.Errorf("не удалось открыть файл конфигурации: %w", err)
+		log.Fatalf("Не удалось прочитать файл: %v", err)
 	}
-	defer file.Close()
+	config := struct {
+		User     string `json:"user"`
+		Password string `json:"password"`
+		Dbname   string `json:"dbname"`
+		Sslmode  string `json:"sslmode"`
+		Host     string `json:"host"`
+		Port     string `json:"port"`
+	}{}
+	// Парсинг JSON
+	if err := json.Unmarshal(data, &config); err != nil {
+		log.Fatalf("Ошибка парсинга JSON: %v", err)
+	}
 
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&Config); err != nil {
-		return _, fmt.Errorf("ошибка декодирования JSON: %w", err)
-	}
-	return _, nil
+	// Формирование строки подключения
+	result := fmt.Sprintf(
+		"user=%s password=%s dbname=%s sslmode=%s host=%s port=%s",
+		config.User, config.Password, config.Dbname, config.Sslmode, config.Host, config.Port,
+	)
+	fmt.Println("\n\n\n\nresult: ", result, "\n\n\n")
+
+	return result
 }
