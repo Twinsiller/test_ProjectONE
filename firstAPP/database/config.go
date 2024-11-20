@@ -31,7 +31,6 @@ func StringConnectToBase(filePath string) string {
 		"user=%s password=%s dbname=%s sslmode=%s host=%s port=%s",
 		config.User, config.Password, config.Dbname, config.Sslmode, config.Host, config.Port,
 	)
-	fmt.Println("\n\n\n\nresult: ", result, "\n\n\n")
 
 	return result
 }

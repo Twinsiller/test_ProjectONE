@@ -1,6 +1,6 @@
 {
     "user": "postgres",
-    "password": "1706",
+    "password": "qwerty",
     "dbname": "ProjectONE",
     "sslmode": "disable",
     "host": "localhost",

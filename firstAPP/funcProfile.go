@@ -22,18 +22,12 @@ type Profile struct {
 	CreatedAt    time.Time `json:"createdat"`
 }
 
-var profiles = []Profile{
-	//{id: 87, nickname: "Check", hashPassword: "dsawqcxs", status: true, accessLevel: 23, firstname: "Tom", lastname: "qwerty", t: time.Now()},
-}
+var profiles = []Profile{}
 
 func GetProfiles(c *gin.Context) {
-	//Db := *DbGlobal
-	//fmt.Println(Db)
-	fmt.Println("===inFunc====DbGlobal :\n", DbGlobal, "\n\n\n\n")
-	fmt.Println("===inFunc====*DbGlobal :\n", *DbGlobal, "\n\n\n\n")
-	rows, err := (*DbGlobal).Query("select * from profiles")
+	rows, err := (*DbGlobal).Query("seelect * from profiles")
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	defer rows.Close()
 
@@ -46,11 +40,9 @@ func GetProfiles(c *gin.Context) {
 		}
 		profiles = append(profiles, p)
 	}
-	// fmt.Println("Выгруженные данные из базы по профилям")
-	// for _, p := range profiles {
-	// 	fmt.Println(p.id, p.nickname, p.status, p.accessLevel, p.firstname, p.lastname)
-	// }
+
 	c.JSON(http.StatusOK, profiles)
+	profiles = []Profile{}
 }
 
 func GetProfileById(c *gin.Context) {
@@ -80,45 +72,49 @@ func CreateProfile(c *gin.Context) {
 
 	if hash, err := password.Hash(p.HashPassword); err != nil {
 		log.Print(err)
+		return
 	} else {
 		p.HashPassword = hash
 	}
-	result, err := Db.Exec("insert into profiles (nickname, hash_password, status, access_level, firstname, lastname, created_at) values ( $1, $2, $3, $4, $5, $6, $7)",
-		p.Nickname, p.HashPassword, p.Status, p.AccessLevel, p.Firstname, p.Lastname, time.Now(),
+
+	result, err := Db.Exec("insert into profiles (nickname, hash_password, status, access_level, firstname, lastname) values ( $1, $2, $3, $4, $5, $6)",
+		p.Nickname, p.HashPassword, p.Status, p.AccessLevel, p.Firstname, p.Lastname,
 	)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(result.LastInsertId()) // не поддерживается
 	fmt.Println(result.RowsAffected()) // количество добавленных строк
-	profiles = append(profiles, p)
 	c.JSON(http.StatusCreated, p)
 }
 
-// func UpdateProfile(c *gin.Context) {
-// 	idStr := c.Param("id")
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid id"})
-// 		return
-// 	}
-// 	var updatedProfile Profile
+func UpdateProfile(c *gin.Context) {
+	var Db = *DbGlobal
+	id := c.Param("id")
+	var p Profile
 
-// 	if err := c.BindJSON(&updatedProfile); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
-// 		return
-// 	}
+	if err := c.BindJSON(&p); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
+		return
+	}
 
-// 	for i, profile := range profiles {
-// 		if profile.id == id {
-// 			profiles[i] = updatedProfile
-// 			c.JSON(http.StatusOK, updatedProfile)
-// 			return
-// 		}
-// 	}
+	if hash, err := password.Hash(p.HashPassword); err != nil {
+		log.Print(err)
+		return
+	} else {
+		p.HashPassword = hash
+	}
 
-// 	c.JSON(http.StatusNotFound, gin.H{"message": "book not found"})
-// }
+	result, err := Db.Exec("UPDATE profiles SET nickname = $1, hash_password = $2, status = $3, access_level = $4, firstname = $5, lastname = $6  WHERE id = $7",
+		p.Nickname, p.HashPassword, p.Status, p.AccessLevel, p.Firstname, p.Lastname, id,
+	)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(result.LastInsertId()) // не поддерживается
+	fmt.Println(result.RowsAffected()) // количество добавленных строк
+	c.JSON(http.StatusAccepted, p)
+}
 
 // func DeleteProfile(c *gin.Context) {
 // 	idStr := c.Param("id")
