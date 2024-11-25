@@ -25,7 +25,7 @@ type Profile struct {
 var profiles = []Profile{}
 
 func GetProfiles(c *gin.Context) {
-	rows, err := (*DbGlobal).Query("seelect * from profiles")
+	rows, err := (*DbGlobal).Query("select * from profiles")
 	if err != nil {
 		log.Panic(err)
 	}
