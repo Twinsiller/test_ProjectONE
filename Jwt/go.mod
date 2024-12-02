@@ -1,16 +1,14 @@
-module test_ProjectONE
+module Jwt
 
 go 1.23.1
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.10.0
-	github.com/lib/pq v1.10.9
-	github.com/sirupsen/logrus v1.9.3
-	github.com/vzglad-smerti/password_hash v0.0.0-20151126002249-16da77469e78
 )
 
 require (
-	github.com/bytedance/sonic v1.12.4 // indirect
+	github.com/bytedance/sonic v1.12.5 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect

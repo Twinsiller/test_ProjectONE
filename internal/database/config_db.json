@@ -1,8 +1,0 @@
-{
-    "user": "postgres",
-    "password": "qwerty",
-    "dbname": "ProjectONE",
-    "sslmode": "disable",
-    "host": "localhost",
-    "port": "5432"
-}
