@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -29,6 +30,8 @@ func generateToken(username string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, _ := token.SignedString(jwtKey)
+	fmt.Println("\n\n", ss)
 	return token.SignedString(jwtKey)
 }
 
@@ -57,8 +60,9 @@ func login(c *gin.Context) {
 func authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
-
+		fmt.Println("\n\n", tokenString)
 		claims := &Claims{}
+		fmt.Println("\n\nclaims", claims)
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
@@ -111,8 +115,8 @@ func main() {
 	protected := router.Group("/")
 	protected.Use(authMiddleware())
 	{
-		protected.GET("/profiles", GetProfiles)
-		protected.POST("/profiles", CreateProfile)
+		protected.GET("profiles", GetProfiles)
+		protected.POST("profiles", CreateProfile)
 		// другие защищенные маршруты
 	}
 
