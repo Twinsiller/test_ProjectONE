@@ -62,7 +62,7 @@ func authMiddleware() gin.HandlerFunc {
 		tokenString := c.GetHeader("Authorization")
 		fmt.Println("\n\n", tokenString)
 		claims := &Claims{}
-		fmt.Println("\n\nclaims", claims)
+		fmt.Println("\n\nclaims.Username ", claims.Username)
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
