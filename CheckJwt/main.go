@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -22,7 +23,7 @@ type Claims struct {
 }
 
 func generateToken(username string) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(20 * time.Minute)
 	claims := &Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
@@ -59,11 +60,11 @@ func login(c *gin.Context) {
 
 func authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
+		tokenString := strings.Split(c.GetHeader("Authorization"), " ")
 		fmt.Println("\n\n", tokenString)
 		claims := &Claims{}
 		fmt.Println("\n\nclaims.Username ", claims.Username)
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString[1], claims, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
 
@@ -72,7 +73,7 @@ func authMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
+		fmt.Printf("%v %v", claims.Username, claims.StandardClaims.ExpiresAt)
 		c.Next()
 	}
 }
